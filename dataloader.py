@@ -12,12 +12,12 @@ import netCDF4 as nc
 
 class DataLoaderDALES:
 
-    def __init__(self, load_path):
+    def __init__(self, load_path,casenr='001'):
         print('Initialising dataloader...')
         self.lp = load_path
 
         try:
-            self.ds = nc.Dataset(self.lp+'/fielddump.001.nc')
+            self.ds = nc.Dataset(self.lp+'/merged_fielddump.'+casenr+'.nc')
             self.time  = np.ma.getdata(self.ds.variables['time'][:]) / 3600
             self.xf    = np.ma.getdata(self.ds.variables['xt'][:]) 
             self.xh    = np.ma.getdata(self.ds.variables['xm'][:])
@@ -27,14 +27,14 @@ class DataLoaderDALES:
             print('Warning: No 3D fields loaded, load_ routines that rely on \
                    these fields will fail.')
 
-        self.ds1= nc.Dataset(self.lp+'/profiles.001.nc')
+        self.ds1= nc.Dataset(self.lp+'/profiles.'+casenr+'.nc')
         self.zf     = np.ma.getdata(self.ds1.variables['zt'][:])
         self.zh     = np.ma.getdata(self.ds1.variables['zm'][:])        
         self.time1d = np.ma.getdata(self.ds1.variables['time'][:])
         self.rhobf  = np.ma.getdata(self.ds1.variables['rhobf'][:])
         self.rhobh  = np.ma.getdata(self.ds1.variables['rhobh'][:])
 
-        self.ilp = np.loadtxt(self.lp+'/lscale.inp.001')
+        self.ilp = np.loadtxt(self.lp+'/lscale.inp.'+casenr)
         self.zf_inp = self.ilp[:,0]
         self.wfls = self.ilp[:,3]
         self.dqdt_ls = self.ilp[:,6]

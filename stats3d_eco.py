@@ -187,8 +187,10 @@ wthlvpf_diff_moist_time = np.zeros((plttime.size,izmax-izmin-5))
 wthlvpf_diff_dry_time = np.zeros((plttime.size,izmax-izmin-5))
 
 thl_av_time = np.zeros((plttime.size,izmax-izmin))
-qt_av_time = np.zeros((plttime.size,izmax-izmin))
+qt_av_time  = np.zeros((plttime.size,izmax-izmin))
 thlv_av_time = np.zeros((plttime.size,izmax-izmin))
+u_av_time   = np.zeros((plttime.size,izmax-izmin))
+v_av_time   = np.zeros((plttime.size,izmax-izmin))
 
 thlpf_moist_time = np.zeros((plttime.size,izmax-izmin))
 thlpf_dry_time = np.zeros((plttime.size,izmax-izmin))
@@ -260,15 +262,20 @@ for i in range(len(plttime)):
     if pflag:
         pp = dl.load_p(plttime[i], izmin, izmax)
 
-    # Slab averaging
-    thl_av = np.mean(thlp,axis=(1,2))
-    qt_av = np.mean(qt,axis=(1,2))   
-    ql_av = np.mean(qlp,axis=(1,2))
+    # Slab averaging scalars
+    thl_av  = np.mean(thlp,axis=(1,2))
+    qt_av   = np.mean(qt,axis=(1,2))   
+    ql_av   = np.mean(qlp,axis=(1,2))
     thlv_av = thl_av*(1+0.608*qt_av)
+    # Slab averaging winds
+    u_av    = np.mean(u,axis=(1,2))
+    v_av    = np.mean(v,axis=(1,2))
     
     thl_av_time[i,:] = thl_av
     qt_av_time[i,:] = qt_av
     thlv_av_time[i,:] = thlv_av
+    u_av_time[i,:] = u_av
+    v_av_time[i,:] = v_av
     
     # -> need presf for thv_av, taken from nearest 1d data time and half-level
     presh  = dl.load_presh(it1d, izmin, izmax)
@@ -306,6 +313,10 @@ for i in range(len(plttime)):
     thlp = thlp - thl_av[:,np.newaxis,np.newaxis]
     thlvp = thlvp - thlv_av[:,np.newaxis,np.newaxis]
     qlp = qlp - ql_av[:,np.newaxis,np.newaxis]
+
+    # Perturbation for winds
+    up  = u - u_av[:,np.newaxis,np.newaxis]
+    vp  = v - v_av[:,np.newaxis,np.newaxis]
     
     # Slab average resolved fluxes
     wqt_av = np.mean(wf*qtp,axis=(1,2))
@@ -336,6 +347,14 @@ for i in range(len(plttime)):
     qlpf = lowPass(qlp, circ_mask)
     qlpp = qlp - qlpf
     del qlp
+    # Filtered u wind
+    upf = lowPass(up, circ_mask)
+    upp = up - upf
+    del up
+    # Filtered v wind
+    vpf = lowPass(vp, circ_mask)
+    vpp = vp - vpf
+    del vp
 
     gc.collect()
     
@@ -429,6 +448,9 @@ for i in range(len(plttime)):
     # Scale decompose wthlvf and wql contributions FIXME need to make Galilean invariant
     wthlvpf_l, wthlvpf_c, wthlvpf_r = scaleDecomposeFlux(wff , wfp, thlvpf, thlvpp, circ_mask)
     wqlpf_l, wqlpf_c, wqlpf_r = scaleDecomposeFlux(wff , wfp, qlpf, qlpp, circ_mask)
+    # for winds
+    upf_l, upf_c, upf_r = scaleDecomposeFlux(wff , wfp, upf, upp, circ_mask)
+    vpf_l, vpf_c, vpf_r = scaleDecomposeFlux(wff , wfp, vpf, vpp, circ_mask)
     
     wthlvpf_l_moist_time[i,:] = mean_mask(wthlvpf_l, mask_moist)
     wthlvpf_l_dry_time[i,:] = mean_mask(wthlvpf_l, mask_dry)
@@ -622,8 +644,9 @@ for i in range(len(plttime)):
     # patches and their growth through shear obscure their evolution. 
     # This is equivalent to computing d/dx_h(u_h'a'). 
     
-    up = u - np.mean(u, axis=(1,2))[:,np.newaxis,np.newaxis]
-    vp = v - np.mean(v, axis=(1,2))[:,np.newaxis,np.newaxis]
+    # already defined above
+    # up = u - np.mean(u, axis=(1,2))[:,np.newaxis,np.newaxis]
+    # vp = v - np.mean(v, axis=(1,2))[:,np.newaxis,np.newaxis]
     
     # Horizontal thlv advection
     div_uhthlvp = ddxhuha_2nd(up, vp, thlvpf+thlvpp, dx, dy)
@@ -963,6 +986,8 @@ for i in range(len(plttime)):
         np.save(lp+'/thl_av_time.npy',thl_av_time)
         np.save(lp+'/thlv_av_time.npy',thlv_av_time)
         np.save(lp+'/qt_av_time.npy',qt_av_time)
+        np.save(lp+'/u_av_time.npy',u_av_time)
+        np.save(lp+'/v_av_time.npy',v_av_time)
         
         np.save(lp+'/thlpf_moist_time.npy',thlpf_moist_time)
         np.save(lp+'/thlpf_dry_time.npy',thlpf_dry_time)
