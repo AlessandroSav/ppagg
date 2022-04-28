@@ -11,7 +11,8 @@ import matplotlib.pyplot as plt
 import netCDF4 as nc
 import gc
 import sys
-sys.path.insert(1, '/home/janssens/scripts/pp3d/')
+# sys.path.insert(1, '/home/janssens/scripts/pp3d/')
+sys.path.insert(1, '/Users/acmsavazzi/Documents/WORK/PhD_Year2/Borrowed_material/ppagg/')
 from functions import *
 from dataloader import DataLoaderDALES, DataLoaderDALESSeparate, DataLoaderMicroHH
 import argparse
@@ -38,6 +39,7 @@ if parseFlag:
 
     mod = args.mod
     lp = args.dir
+    lp = '/Users/acmsavazzi/Documents/WORK/PhD_Year1/DATA/DALES/DALES/Experiments/20200209_10/Exp_006'
     itmin = args.itmin
     itmax = args.itmax
     di = args.dt
@@ -52,7 +54,7 @@ if parseFlag:
 else:
     mod = 'dales'
     # lp = '/home/hp200321/data/botany-6-768/runs/Run_40'
-    lp = '/scratch-shared/janssens/eurec4a_mean'
+    lp = '/Users/acmsavazzi/Documents/WORK/PhD_Year1/DATA/DALES/DALES/Experiments/20200209_10/Exp_006'
     itmin = 63
     itmax = 64
     di    = 1
@@ -68,7 +70,7 @@ else:
 #%% Dry/moist regions
 
 if mod == 'dales':
-    dl = DataLoaderDALES(lp)
+    dl = DataLoaderDALES(lp,casenr='001')
 elif mod == 'dales_separate':
     dl = DataLoaderDALESSeparate(lp)
 elif mod == 'microhh':

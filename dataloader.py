@@ -33,12 +33,14 @@ class DataLoaderDALES:
         self.time1d = np.ma.getdata(self.ds1.variables['time'][:])
         self.rhobf  = np.ma.getdata(self.ds1.variables['rhobf'][:])
         self.rhobh  = np.ma.getdata(self.ds1.variables['rhobh'][:])
-
-        self.ilp = np.loadtxt(self.lp+'/lscale.inp.'+casenr)
-        self.zf_inp = self.ilp[:,0]
-        self.wfls = self.ilp[:,3]
-        self.dqdt_ls = self.ilp[:,6]
-        self.dthldt_ls = self.ilp[:,7]
+        try: 
+            self.ilp = np.loadtxt(self.lp+'/lscale.inp.'+casenr, skiprows=2)
+            self.zf_inp = self.ilp[:,0]
+            self.wfls = self.ilp[:,3]
+            self.dqdt_ls = self.ilp[:,6]
+            self.dthldt_ls = self.ilp[:,7]
+        except:
+            print('Warning: No lscale.inp, need to read ls_flux.inp')
         print('Set paths to all datasets and extracted dimensions')
 
     def load_qt(self, it, izmin, izmax):
